@@ -21,6 +21,7 @@ import com.embabel.agent.spi.support.RegistryToolGroupResolver
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 /**
  * Tests for [ToolConsumer] and related interfaces.
@@ -226,6 +227,69 @@ class ToolConsumerTest {
 
             assertEquals(1, resolved.size)
             assertEquals("static-tool", resolved[0].definition.name)
+        }
+
+        @Test
+        fun `resolveTools throws when required tool group is not found`() {
+            val resolver = createEmptyResolver()
+            val consumer = createToolConsumer(
+                name = "strict-consumer",
+                tools = emptyList(),
+                toolGroups = setOf(ToolGroupRequirement("missing-role", required = true)),
+            )
+
+            assertThrows<RequiredToolGroupUnavailableException> {
+                consumer.resolveTools(resolver)
+            }
+        }
+
+        @Test
+        fun `resolveTools throws when required tool group has no tools`() {
+            val emptyGroup = createToolGroup("empty-role", emptyList())
+            val resolver = RegistryToolGroupResolver("test", listOf(emptyGroup))
+            val consumer = createToolConsumer(
+                name = "strict-empty-consumer",
+                tools = emptyList(),
+                toolGroups = setOf(ToolGroupRequirement("empty-role", required = true)),
+            )
+
+            assertThrows<RequiredToolGroupUnavailableException> {
+                consumer.resolveTools(resolver)
+            }
+        }
+
+        @Test
+        fun `resolveTools succeeds when required tool group has tools`() {
+            val groupTool = createMockTool("required-tool")
+            val toolGroup = createToolGroup("required-role", listOf(groupTool))
+            val resolver = RegistryToolGroupResolver("test", listOf(toolGroup))
+            val consumer = createToolConsumer(
+                name = "strict-happy-consumer",
+                tools = emptyList(),
+                toolGroups = setOf(ToolGroupRequirement("required-role", required = true)),
+            )
+
+            val resolved = consumer.resolveTools(resolver)
+
+            assertEquals(1, resolved.size)
+            assertEquals("required-tool", resolved[0].definition.name)
+        }
+
+        @Test
+        fun `exception message for missing required group includes role name`() {
+            val resolver = createEmptyResolver()
+            val consumer = createToolConsumer(
+                name = "strict-consumer",
+                tools = emptyList(),
+                toolGroups = setOf(ToolGroupRequirement("my-special-role", required = true)),
+            )
+
+            val ex = assertThrows<RequiredToolGroupUnavailableException> {
+                consumer.resolveTools(resolver)
+            }
+
+            assertEquals("my-special-role", ex.role)
+            assertTrue(ex.message!!.contains("my-special-role"))
         }
     }
 

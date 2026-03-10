@@ -86,6 +86,10 @@ interface ToolConsumer : ToolSpecConsumer,
             for (role in toolConsumer.toolGroups) {
                 val resolution = toolGroupResolver.resolveToolGroup(role)
                 if (resolution.resolvedToolGroup == null) {
+                    val msg = "No tool group found with role '${role.role}'"
+                    if (role.required) {
+                        throw RequiredToolGroupUnavailableException(role.role, msg)
+                    }
                     loggerFor<ToolConsumer>().warn(
                         "Could not resolve tool group with role='{}': {}\n{}",
                         role,
@@ -93,6 +97,10 @@ interface ToolConsumer : ToolSpecConsumer,
                         NO_TOOLS_WARNING,
                     )
                 } else if (resolution.resolvedToolGroup.tools.isEmpty()) {
+                    val msg = "Tool group found but contains no tools (MCP initialization may have failed)"
+                    if (role.required) {
+                        throw RequiredToolGroupUnavailableException(role.role, msg)
+                    }
                     loggerFor<ToolConsumer>().warn(
                         "No tools found for tool group with role='{}': {}\n{}",
                         role,

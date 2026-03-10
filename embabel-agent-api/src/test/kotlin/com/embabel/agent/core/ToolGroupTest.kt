@@ -157,6 +157,20 @@ class ToolGroupTest {
         }
 
         @Test
+        fun `ToolGroupRequirement defaults to not required`() {
+            val requirement = ToolGroupRequirement(role = "some-role")
+
+            assertFalse(requirement.required)
+        }
+
+        @Test
+        fun `ToolGroupRequirement can be marked required`() {
+            val requirement = ToolGroupRequirement(role = "some-role", required = true)
+
+            assertTrue(requirement.required)
+        }
+
+        @Test
         fun `ToolGroupRequirement equals works correctly`() {
             val req1 = ToolGroupRequirement(role = "same-role")
             val req2 = ToolGroupRequirement(role = "same-role")
@@ -164,6 +178,14 @@ class ToolGroupTest {
 
             assertEquals(req1, req2)
             assertNotEquals(req1, req3)
+        }
+
+        @Test
+        fun `required flag is part of equality`() {
+            val optional = ToolGroupRequirement(role = "same-role", required = false)
+            val required = ToolGroupRequirement(role = "same-role", required = true)
+
+            assertNotEquals(optional, required)
         }
     }
 
