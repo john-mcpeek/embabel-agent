@@ -118,6 +118,14 @@ interface PromptRunner : LlmUse, PromptRunnerOperations, ToolChaining<PromptRunn
         withToolGroup(ToolGroupRequirement(toolGroup))
 
     /**
+     * Add a tool group to the PromptRunner with an explicit required flag.
+     * When [required] is true, resolution will throw [com.embabel.agent.core.RequiredToolGroupUnavailableException]
+     * if the group is not found or has no tools, rather than logging a warning.
+     */
+    fun withToolGroup(toolGroup: String, required: Boolean): PromptRunner =
+        withToolGroup(ToolGroupRequirement(toolGroup, required = required))
+
+    /**
      * Allows for dynamic tool groups to be added to the PromptRunner.
      */
     fun withToolGroup(toolGroup: ToolGroup): PromptRunner
