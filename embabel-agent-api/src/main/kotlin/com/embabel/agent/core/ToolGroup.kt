@@ -128,12 +128,9 @@ interface ToolGroupMetadata : ToolGroupDescription, AssetCoordinates, HasInfoStr
 
 /**
  * Specifies a tool group that a tool consumer requires.
- * @param required if true, throws [RequiredToolGroupUnavailableException] when the group
- * cannot be resolved or has no tools, rather than logging a warning.
  */
-data class ToolGroupRequirement @JvmOverloads constructor(
+data class ToolGroupRequirement(
     val role: String,
-    val required: Boolean = false,
 )
 
 interface ToolGroupConsumer {
